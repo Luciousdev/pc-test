@@ -160,7 +160,7 @@ def printResults(min_temperature, max_temperature, avg_temperature, interval, id
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PC Benchmark</title>
+    <title>Report from - {time}</title>
     <style>
         body {{
             background-color: #222;
