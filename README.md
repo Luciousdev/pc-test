@@ -69,8 +69,7 @@ Small list of the output it will generate for you:
     - System info.
     - When the report is generated.
     
-There are example reports for [WINDOWS](https://github.com/Luciousdev/pc-test/tree/main/assets/examples/windows) and for [LINUX](https://github.com/Luciousdev/pc-test/tree/main/assets/examples/linux), if you're interested in seeing the results before using the program.
-Note: The examples are HTML pages so make sure to download the HTML and png files to see the example.
+There are example reports for [WINDOWS](https://examples.luciousdev.nl/windows/) and for [LINUX](https://examples.luciousdev.nl/linux/), if you're interested in seeing the results before using the program.
 
 ## Made-by
 
