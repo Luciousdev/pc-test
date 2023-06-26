@@ -69,6 +69,99 @@ def getSystemSpecs():
 
     return specs
 
+def get_system_info():
+    system_info = {}
+
+    # Install date of OS (Windows)
+    if platform.system() == 'Windows':
+        install_date = get_windows_install_date()
+        system_info['Install Date'] = install_date
+    else:
+        system_info['Install Date'] = "N/A"
+
+    # Kernel version (Linux)
+    kernel_version = get_linux_kernel_version()
+    system_info['Kernel Version'] = kernel_version
+    if platform.system() == 'Windows':
+        system_info['Kernel Version'] = "N/A"
+
+    uptime = get_system_uptime()
+    system_info['Uptime'] = uptime
+
+    domain_name = get_domain_name()
+    system_info['Domain Name'] = domain_name
+
+    hostname = get_hostname()
+    system_info['Hostname'] = hostname
+
+    boot_mode = get_boot_mode()
+    system_info['Boot Mode'] = boot_mode
+
+    boot_state = get_boot_state()
+    system_info['Boot State'] = boot_state
+
+    windowsVersion = get_windows_version()
+    system_info['Windows Version'] = windowsVersion
+
+    return system_info
+
+# Install date of OS (Windows)
+def get_windows_install_date():
+    command = 'wmic os get installdate /value'
+    output = subprocess.check_output(command, shell=True, universal_newlines=True)
+    install_date_str = output.strip().split('=')[1]
+    install_date = datetime.datetime.strptime(install_date_str, '%Y%m%d%H%M%S')
+    return install_date
+
+def get_windows_version():
+    if platform.system() == 'Windows':
+        return platform.win32_ver()[0]
+    else:
+        return 'N/A' 
+
+# Kernel version (Linux)
+def get_linux_kernel_version():
+    return platform.uname().release
+
+def get_system_uptime():
+    uptime_output = subprocess.check_output(['uptime', '-p'], universal_newlines=True)
+    return uptime_output.strip()
+
+def get_domain_name():
+    return platform.node().split('.', 1)[-1] 
+
+def get_hostname():
+    return platform.node()
+
+# Boot mode (Windows)
+def get_boot_mode_windows():
+    boot_mode_output = subprocess.check_output(['wmic', 'computersystem', 'get', 'BootupState'], universal_newlines=True)
+    boot_mode = boot_mode_output.strip().split('\n')[-1]
+    return boot_mode
+
+# Boot mode (Linux)
+def get_boot_mode_linux():
+    boot_mode_output = subprocess.check_output(['lsblk', '-o', 'NAME,FSTYPE,MOUNTPOINT', '-J'], universal_newlines=True)
+    if 'boot/efi' in boot_mode_output:
+        return 'UEFI'
+    return 'Legacy BIOS'
+
+def get_boot_mode():
+    if platform.system() == 'Windows':
+        return get_boot_mode_windows()
+    elif platform.system() == 'Linux':
+        return get_boot_mode_linux()
+    return None
+
+
+def get_boot_state():
+    if platform.system() == 'Windows':
+        boot_state_output = subprocess.check_output(['bcdedit'], universal_newlines=True)
+        return 'Normal' if 'resumeobject' in boot_state_output else 'Abnormal'
+    else:
+        return 'N/A'
+
+
 
 def get_battery_status():
     battery = psutil.sensors_battery()
@@ -180,13 +273,16 @@ def createProcessesTable():
 
 
 def printResults(min_temperature, max_temperature, avg_temperature, interval, idle_temperature, dropOff):
+    systemInfo = get_system_info()
+    if idle_temperature is None: idle_temperature = "N/A"
+    if max_temperature is None: max_temperature = "N/A"
+    if avg_temperature is None: avg_temperature = "N/A"
     processesTable = createProcessesTable()
     batteryStatus = get_battery_status()
     systemSpecs = getSystemSpecs()
     prInfo("[INFO] - Generating HTML report")
     now = datetime.now()
-    time = now.strftime("%Y-%m-%d-%H-%M-%S")
-    # Generate line graph
+    time = now.strftime("%Y-%m-%d-%H:%M:%S")
     generate_line_graph(dropOff, time)
     
     template = f"""
@@ -262,6 +358,7 @@ def printResults(min_temperature, max_temperature, avg_temperature, interval, id
 <body class="dark-mode">
     <ul>
         <li><a href="#systemspec">System specifications</a></li>
+        <li><a href="#sysinfo">System info</a></li>
         <li><a href="#battery">Battery status</a></li>
         <li><a href="#benchmark">CPU benchmark results</a></li>
         <li><a href="#systemproc">Running system processes</a></li>
@@ -273,6 +370,11 @@ def printResults(min_temperature, max_temperature, avg_temperature, interval, id
     <div class="container">
         <h1 id="systemspec">System specifications</h1>
         <p>CPU idle temp: {idle_temperature}<br>CPU: {systemSpecs['CPU']} <br>CPU Architecture: {systemSpecs['CPU Architecture']} <br>CPU Cores: {systemSpecs['CPU Cores']} <br>CPU Threads: {systemSpecs['CPU Threads']} <br>Max CPU Frequency: {systemSpecs['Max CPU Frequency']} <br>Base CPU Frequency: {systemSpecs['Base CPU Frequency']} <br>GPU Names: {systemSpecs['GPU Names']} <br>Network Cards: {systemSpecs['Network Cards']} <br>Total RAM: {systemSpecs['Total RAM']}MB </p>
+    </div>
+    <hr>
+    <div class="container">
+        <h1 id="sysinfo">System info</h1>
+        <p>Windows version: {systemInfo['Windows Version']}<br>Install date (Currently windows only): {systemInfo['Install Date']}<br>Kernel/linux version: {systemInfo['Kernel Version']}<br>Uptime: {systemInfo['Uptime']}<br>Hostname: {systemInfo['Hostname']}<br>Domainname: {systemInfo['Domain Name']}<br>Boot mode: {systemInfo['Boot Mode']}<br>Boot state: {systemInfo['Boot State']}</p>
     </div>
     <hr>
     <div class="container">
@@ -376,7 +478,7 @@ if __name__ == '__main__':
     userinput = input("Would you like to customize the benchmark? [y/n] ")
     if userinput == "n":
         prInfo("[INFO] - Using default values...")
-        interval = 300
+        interval = 120
         utilization = 100
     else:
         interval = int(input("Enter the benchmark duration in seconds: "))
