@@ -2,13 +2,13 @@
 
 ## Table of contents
 
-- [Info](#Info)
-    - [Packages](#Packages) 
-    - [What it does](#What-it-does) 
-- [Guides](#titel-van-sectie-2)
-    - [Install guide](#Install-guide)
-    - [How to use the program and default settings](#How-to-use-the-program&default-settings)
-- [Output](#Output)
+- [Info](#info)
+    - [Packages](#packages) 
+    - [What it does](#what-it-does) 
+- [Guides](#guides)
+    - [Install guide](#install-guide)
+    - [How to use the program and default settings](#how-to-use-the-program&default-settings)
+- [Output](#output)
 - [Made by](#made-by)
 
 ## Info
