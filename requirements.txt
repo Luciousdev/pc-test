@@ -1,3 +1,4 @@
 psutil
 GPUtil
 py-cpuinfo
+matplotlib

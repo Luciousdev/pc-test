@@ -9,7 +9,10 @@ def generate_cpu_load(interval=int(sys.argv[1]),utilization=int(sys.argv[2])):
     for i in range(0,int(interval)):
         # print("About to do some arithmetic")
         while time.time()-start_time < utilization/100.0:
-            a = math.sqrt(64*64*64*64*64)
+            result = 0
+            for i in range(1, 100000):
+                result += math.sin(math.sqrt(i)) * math.exp(-i / 1000)
+                a = math.sqrt(1024*1024*1024 * (i%100))
         # print(str(i) + ". About to sleep")
         time.sleep(1-utilization/100.0)
         start_time += 1

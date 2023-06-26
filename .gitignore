@@ -2,3 +2,4 @@ notneededrn.py
 test.py
 gpu-load.py
 *.html
+*.png

@@ -7,6 +7,7 @@ import cpuinfo
 import platform
 import GPUtil
 from datetime import datetime
+import matplotlib.pyplot as plt
 
 
 #---------------------------------------------------------#
@@ -18,6 +19,8 @@ def prError(skk):print("\033[91m {}\033[00m" .format(skk))
 def prOk(skk):print("\033[92m {}\033[00m" .format(skk))
 def prWarning(skk):print("\033[93m {}\033[00m" .format(skk))
 def prInfo(skk):print("\033[94m {}\033[00m" .format(skk))
+
+version = "1.0.0"
 
 #---------------------------------------------------------#
 #                                                         #                            
@@ -115,6 +118,35 @@ def get_running_processes():
 #                                                         #
 #---------------------------------------------------------#
 
+def generate_line_graph(temperatures, filename):
+    x = list(range(1, len(temperatures) + 1))
+    y = temperatures
+
+    plt.rcParams['axes.facecolor'] = '#222222'  
+    plt.rcParams['axes.edgecolor'] = '#222222'  
+    plt.rcParams['axes.labelcolor'] = '#ccc' 
+    plt.rcParams['xtick.color'] = '#ccc'
+    plt.rcParams['ytick.color'] = '#ccc'
+
+    fig, ax = plt.subplots()
+
+    ax.set_facecolor('#222222')
+    plt.tight_layout()
+    ax.plot(x, y, color='#FF0800')  
+
+    ax.set_xlabel('Time (seconds)')
+    ax.set_ylabel('CPU Temperature (°C)')
+    ax.set_title('CPU Temperature drop-off after benchmark')
+
+    
+    ax.grid(True, color='#ffffff', linestyle='--')  
+
+    plt.savefig(f"{filename}_cpu_temperature_graph.png", bbox_inches='tight')
+    plt.close()
+
+    print('Line graph generated: ', f"{filename}_cpu_temperature_graph.png")
+
+
 def createProcessesTable():
     running_processes = get_running_processes()
     total_processes = len(running_processes)
@@ -147,12 +179,16 @@ def createProcessesTable():
     return html
 
 
-def printResults(min_temperature, max_temperature, avg_temperature, interval, idle_temperature):
+def printResults(min_temperature, max_temperature, avg_temperature, interval, idle_temperature, dropOff):
     processesTable = createProcessesTable()
     batteryStatus = get_battery_status()
     systemSpecs = getSystemSpecs()
+    prInfo("[INFO] - Generating HTML report")
     now = datetime.now()
     time = now.strftime("%Y-%m-%d-%H-%M-%S")
+    # Generate line graph
+    generate_line_graph(dropOff, time)
+    
     template = f"""
 <!DOCTYPE html>
 <html lang="en">
@@ -231,8 +267,12 @@ def printResults(min_temperature, max_temperature, avg_temperature, interval, id
         <li><a href="#systemproc">Running system processes</a></li>
     </ul>
     <div class="container">
+        <p>Report generated on {time}</p>
+        <p>System benchmark version: {version}</p>
+    </div>
+    <div class="container">
         <h1 id="systemspec">System specifications</h1>
-        <p>CPU: {systemSpecs['CPU']} <br>CPU Architecture: {systemSpecs['CPU Architecture']} <br>CPU Cores: {systemSpecs['CPU Cores']} <br>CPU Threads: {systemSpecs['CPU Threads']} <br>Max CPU Frequency: {systemSpecs['Max CPU Frequency']} <br>Base CPU Frequency: {systemSpecs['Base CPU Frequency']} <br>GPU Names: {systemSpecs['GPU Names']} <br>Network Cards: {systemSpecs['Network Cards']} <br>Total RAM: {systemSpecs['Total RAM']}MB </p>
+        <p>CPU idle temp: {idle_temperature}<br>CPU: {systemSpecs['CPU']} <br>CPU Architecture: {systemSpecs['CPU Architecture']} <br>CPU Cores: {systemSpecs['CPU Cores']} <br>CPU Threads: {systemSpecs['CPU Threads']} <br>Max CPU Frequency: {systemSpecs['Max CPU Frequency']} <br>Base CPU Frequency: {systemSpecs['Base CPU Frequency']} <br>GPU Names: {systemSpecs['GPU Names']} <br>Network Cards: {systemSpecs['Network Cards']} <br>Total RAM: {systemSpecs['Total RAM']}MB </p>
     </div>
     <hr>
     <div class="container">
@@ -243,6 +283,7 @@ def printResults(min_temperature, max_temperature, avg_temperature, interval, id
     <div class="container">
         <h1 id="benchmark">Benchmark results</h1>
         <p>Benchmark duration: {interval}sec <br>Maximum CPU temperature: {max_temperature}°C <br>Average CPU temperature: {avg_temperature}°C <br>Minimum CPU temperature: {min_temperature}°C </p>
+        <img src="{time}_cpu_temperature_graph.png" alt="CPU Temperature Graph">
     </div>
     <hr>
     {processesTable}
@@ -251,7 +292,7 @@ def printResults(min_temperature, max_temperature, avg_temperature, interval, id
 </html>
 """
 
-    write = open(time+".html", "w")
+    write = open(time + ".html", "w")
     write.write(template)
     write.close()
     prOk(f"[OK] - HTML report generated: {time}.html")
@@ -263,6 +304,19 @@ def printResults(min_temperature, max_temperature, avg_temperature, interval, id
 # ------------------- SYSTEM BENCHMARK -------------------#
 #                                                         #
 #---------------------------------------------------------#
+
+def cpuTempDropOff():
+    temperatures = []
+    start_time = time.time()
+
+    while time.time() - start_time < 60:
+        temperature = get_cpu_temperature()
+        if temperature is not None:
+            temperatures.append(temperature)
+        time.sleep(1)
+
+    return temperatures
+
 
 def get_cpu_temperature():
     try:
@@ -309,8 +363,9 @@ def monitor_cpu_temperature(interval, utilization):
         avg_temperature = statistics.mean(temperatures)
 
         prOk(f"[OK] - CPU test finished.")
-        prInfo("[INFO] - Generating HTML report...")
-        printResults(min_temperature, max_temperature, avg_temperature, interval, idle_temperature)
+        prWarning("[WARNING] - Waiting 60 seconds for the CPU to cool down, and other processes to finish.")
+        dropOff = cpuTempDropOff()
+        printResults(min_temperature, max_temperature, avg_temperature, interval, idle_temperature, dropOff)
     else:
         print("No temperature data available.")
 
@@ -321,7 +376,7 @@ if __name__ == '__main__':
     userinput = input("Would you like to customize the benchmark? [y/n] ")
     if userinput == "n":
         prInfo("[INFO] - Using default values...")
-        interval = 120
+        interval = 300
         utilization = 100
     else:
         interval = int(input("Enter the benchmark duration in seconds: "))
