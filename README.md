@@ -3,24 +3,28 @@
 ## Table of contents
 
 - [Info](#info)
+    - [Support](#support)
     - [Packages](#packages) 
     - [What it does](#what-it-does) 
 - [Guides](#guides)
     - [Install guide](#install-guide)
     - [How to use the program and default settings](#how-to-use-the-program&default-settings)
 - [Output](#output)
+- [Known-issues](#issues)
 - [Made by](#made-by)
 
 ## Info
 
-## Support
+### Support
 
 | OS | Support |
 |---|---|
 | Windows 10/11 | ⚠️ * |
 | Manjaro/Arch | ✅ |
 
-*CPU temp still bugged on windows
+*CPU temp still bugged on windows, you'll have to modify the code yourself for it to work.
+
+Note: You can find more issues under the [Known-issues](#issues) tab.
 
 ### Packages
 
@@ -79,6 +83,11 @@ Small list of the output it will generate for you:
     - When the report is generated.
     
 There are example reports for [WINDOWS](https://examples.luciousdev.nl/windows/) and for [LINUX](https://examples.luciousdev.nl/linux/), if you're interested in seeing the results before using the program.
+
+## issues
+
+- Temperature readings on windows are currently not working. (currently working on support.)
+- Temperature readings on linux can be a bit buggy.
 
 ## Made-by
 
