@@ -21,6 +21,7 @@
 |---|---|
 | Windows 10/11 | ⚠️ * |
 | Manjaro/Arch | ✅ |
+| Ubuntu/Debian | ✅ |
 
 *CPU temp still bugged on windows, you'll have to modify the code yourself for it to work.
 
