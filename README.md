@@ -13,6 +13,15 @@
 
 ## Info
 
+## Support
+
+| OS | Support |
+|---|---|
+| Windows 10/11 | ⚠️ * |
+| Manjaro/Arch | ✅ |
+
+*CPU temp still bugged on windows
+
 ### Packages
 
 List of all packages:

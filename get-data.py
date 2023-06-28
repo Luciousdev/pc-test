@@ -8,6 +8,22 @@ import platform
 import GPUtil
 from datetime import datetime
 import matplotlib.pyplot as plt
+import ctypes
+
+
+#---------------------------------------------------------#
+#                                                         #
+# -------------------- UTILS FUNCTIONS -------------------#
+#                                                         #
+#---------------------------------------------------------#
+
+if psutil.WINDOWS:
+    ohm_dll = ctypes.cdll.LoadLibrary("assets/scripts/OpenHardwareMonitorLib.dll")
+
+    class OHMSensor(ctypes.Structure):
+        _fields_ = [("Name", ctypes.c_char * 128),
+                    ("Value", ctypes.c_float),
+                    ("Identifier", ctypes.c_char * 128)]
 
 
 #---------------------------------------------------------#
@@ -167,6 +183,9 @@ def get_battery_status():
     battery = psutil.sensors_battery()
     prInfo("[INFO] - Retrieving battery status")
     if battery is not None:
+        percent = 0
+        power_status = "Unknown"
+        time_remaining = 0
         plugged = battery.power_plugged
         percent = battery.percent
         remaining = battery.secsleft
@@ -274,12 +293,29 @@ def createProcessesTable():
 
 def printResults(min_temperature, max_temperature, avg_temperature, interval, idle_temperature, dropOff):
     systemInfo = get_system_info()
-    if idle_temperature is None: idle_temperature = "N/A"
-    if max_temperature is None: max_temperature = "N/A"
-    if avg_temperature is None: avg_temperature = "N/A"
     processesTable = createProcessesTable()
     batteryStatus = get_battery_status()
     systemSpecs = getSystemSpecs()
+
+    # Default values for variables to prevent errors 
+    if idle_temperature is None: idle_temperature = "N/A"
+    if max_temperature is None: max_temperature = "N/A"
+    if avg_temperature is None: avg_temperature = "N/A"
+    if min_temperature is None: min_temperature = "N/A"
+    if interval is None: interval = "N/A"
+    if dropOff is None: dropOff = "N/A"
+
+    if batteryStatus is not None:
+        battery_percentage = batteryStatus['percentage']
+        power_status = batteryStatus['power_status']
+        time_remaining = batteryStatus['time_remaining']
+    else:
+        battery_percentage = "N/A"
+        power_status = "N/A"
+        time_remaining = "N/A"
+        print("Battery information not available.")
+
+
     prInfo("[INFO] - Generating HTML report")
     now = datetime.now()
     time = now.strftime("%Y-%m-%d-%H:%M:%S")
@@ -379,7 +415,7 @@ def printResults(min_temperature, max_temperature, avg_temperature, interval, id
     <hr>
     <div class="container">
         <h1 id="battery">Battery status</h1>
-        <p>Percentage: {batteryStatus['percentage']}% <br>Power status: {batteryStatus['power_status']} <br>Time remaining: {batteryStatus['time_remaining']} </p>
+        <p>Percentage: {battery_percentage}% <br>Power status: {power_status} <br>Time remaining: {time_remaining} </p>
     </div>
     <hr>
     <div class="container">
@@ -425,12 +461,23 @@ def get_cpu_temperature():
         prInfo("[INFO] - Retrieving CPU temperature")
         if psutil.WINDOWS:
             # Windows
-            command = "wmic path Win32_PerfFormattedData_Counters_ThermalZoneInformation get Temperature /value"
-            result = subprocess.check_output(command, shell=True, universal_newlines=True)
-            temperature = [float(s.split('=')[1]) / 10.0 for s in result.strip().split('\n') if s.strip().startswith('Temperature')]
-            if temperature:
-                prOk(f"[OK] - CPU temperature: {temperature[0]}°C")
-                return max(temperature)
+            # ohm_dll.HardwareMonitor_Init()
+
+            # sensors = (OHMSensor * 64)()
+
+            # num_sensors = ohm_dll.HarwareMonitor_GetSensors(sensors, ctypes.c_int(len(sensors)))
+
+            # for i in range(num_sensors):
+            #     if b"package" in sensors[i].Identifier.lower():
+            #         return sensors[i].Value
+            
+            return None
+            # command = "wmic path Win32_PerfFormattedData_Counters_ThermalZoneInformation get Temperature /value"
+            # result = subprocess.check_output(command, shell=True, universal_newlines=True)
+            # temperature = [float(s.split('=')[1]) / 10.0 for s in result.strip().split('\n') if s.strip().startswith('Temperature')]
+            # if temperature:
+            #     prOk(f"[OK] - CPU temperature: {temperature[0]}°C")
+            #     return max(temperature)
         else:
             # Linux
             thermal_dir = '/sys/class/thermal'
