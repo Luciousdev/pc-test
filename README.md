@@ -29,7 +29,6 @@
 \** State of MacOS is currently unknown, looking for people to test it. If you have a Mac and want to contribute, shoot me a message on [discord]
 (https://discord.com/users/524229083014365194)
 
-
 Note: You can find more issues under the [Known-issues](#issues) tab.
 
 ### Packages
@@ -94,6 +93,7 @@ There are example reports for [WINDOWS](https://examples.luciousdev.nl/windows/)
 
 - Temperature readings on windows are currently not working. (currently working on support.)
 - Temperature readings on linux can be a bit buggy.
+- CPU Percent readings are still a hit or miss.
 
 ## Made-by
 

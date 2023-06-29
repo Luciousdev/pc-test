@@ -262,6 +262,13 @@ def generate_line_graph(temperatures, filename):
 def createProcessesTable():
     running_processes = get_running_processes()
     total_processes = len(running_processes)
+    totalMemoryPercent = 0
+    for process in running_processes:
+        totalMemoryPercent += process['memory_percent']
+    
+    totalCPUPercent = 0
+    for process in running_processes:
+        totalCPUPercent += process['cpu_percent']
 
     table_rows = ''
     for process in running_processes:
@@ -286,6 +293,8 @@ def createProcessesTable():
         </tr>
         {table_rows}
     </table>
+    <p>Total CPU percent: {totalCPUPercent}%</p>
+    <p>Total memory percent: {totalMemoryPercent}%</p>
 </div>
     """
     return html
@@ -461,11 +470,11 @@ def get_cpu_temperature():
         prInfo("[INFO] - Retrieving CPU temperature")
         if psutil.WINDOWS:
             # Windows
-            # ohm_dll.HardwareMonitor_Init()
+            ohm_dll.HardwareMonitor_Init()
 
-            # sensors = (OHMSensor * 64)()
+            sensors = (OHMSensor * 64)()
 
-            # num_sensors = ohm_dll.HarwareMonitor_GetSensors(sensors, ctypes.c_int(len(sensors)))
+            num_sensors = ohm_dll.HarwareMonitor_GetSensors(sensors, ctypes.c_int(len(sensors)))
 
             # for i in range(num_sensors):
             #     if b"package" in sensors[i].Identifier.lower():
