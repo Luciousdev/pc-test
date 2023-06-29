@@ -13,21 +13,6 @@ import ctypes
 
 #---------------------------------------------------------#
 #                                                         #
-# -------------------- UTILS FUNCTIONS -------------------#
-#                                                         #
-#---------------------------------------------------------#
-
-if psutil.WINDOWS:
-    ohm_dll = ctypes.cdll.LoadLibrary("assets/scripts/OpenHardwareMonitorLib.dll")
-
-    class OHMSensor(ctypes.Structure):
-        _fields_ = [("Name", ctypes.c_char * 128),
-                    ("Value", ctypes.c_float),
-                    ("Identifier", ctypes.c_char * 128)]
-
-
-#---------------------------------------------------------#
-#                                                         #
 # ------------------ CONSOLE OUTPUT COLORS ---------------#
 #                                                         #
 #---------------------------------------------------------#
@@ -37,6 +22,21 @@ def prWarning(skk):print("\033[93m {}\033[00m" .format(skk))
 def prInfo(skk):print("\033[94m {}\033[00m" .format(skk))
 
 version = "1.0.0"
+
+
+#---------------------------------------------------------#
+#                                                         #
+# -------------------- UTILS FUNCTIONS -------------------#
+#                                                         #
+#---------------------------------------------------------#
+
+if psutil.WINDOWS:
+    prOk("[OK] - Detected windows system, importing wmi module")    
+    import wmi
+else:
+    prWarning("[WARNING] - Detected non-windows system, wmi module not imported")
+
+
 
 #---------------------------------------------------------#
 #                                                         #                            
@@ -470,24 +470,23 @@ def get_cpu_temperature():
         prInfo("[INFO] - Retrieving CPU temperature")
         if psutil.WINDOWS:
             # Windows
-            ohm_dll.HardwareMonitor_Init()
-
-            temperature = (OHMSensor * 64)()
-
-            num_sensors = ohm_dll.HarwareMonitor_GetSensors(temperature, ctypes.c_int(len(temperature)))
-
-            for i in range(num_sensors):
-                if b"package" in temperature[i].Identifier.lower():
-                    prOk(f"[OK] - CPU temperature: {temperature}°C")
-                    return temperature[i].Value
-            
-            return None
-            # command = "wmic path Win32_PerfFormattedData_Counters_ThermalZoneInformation get Temperature /value"
-            # result = subprocess.check_output(command, shell=True, universal_newlines=True)
-            # temperature = [float(s.split('=')[1]) / 10.0 for s in result.strip().split('\n') if s.strip().startswith('Temperature')]
-            # if temperature:
-            #     prOk(f"[OK] - CPU temperature: {temperature[0]}°C")
-            #     return max(temperature)
+            def avg(value_list):
+                num = 0
+                length = len(value_list)
+                for val in value_list:
+                    num += val
+                return num/length
+                
+                
+            w = wmi.WMI(namespace="root\\OpenHardwareMonitor")
+            sensors = w.Sensor()
+            cpu_temps = []
+            for sensor in sensors:
+                if sensor.SensorType==u'Temperature' and not 'GPU' in sensor.Name:
+                    cpu_temps += [float(sensor.Value)]
+            temperature = format(avg(cpu_temps))
+            prOk(f"[OK] - CPU temperature: {temperature}°C")
+            return temperature
         else:
             # Linux
             thermal_dir = '/sys/class/thermal'
