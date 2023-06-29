@@ -24,7 +24,7 @@
 | Ubuntu/Debian | ✅ |
 | MacOS | 🚧 ** |
 
-\* CPU temp still bugged on Windows, you'll have to modify the code yourself for it to work.
+\* CPU temperatures do work on windows, but on some devices it will report as 0. (currently working on a solution.)
 
 \** State of MacOS is currently unknown, looking for people to test it. If you have a Mac and want to contribute, shoot me a message on [discord](https://discord.com/users/524229083014365194)
 

@@ -6,9 +6,8 @@ import time
 import cpuinfo
 import platform
 import GPUtil
-from datetime import datetime
+import datetime
 import matplotlib.pyplot as plt
-import ctypes
 
 
 #---------------------------------------------------------#
@@ -123,11 +122,12 @@ def get_system_info():
 
 # Install date of OS (Windows)
 def get_windows_install_date():
-    command = 'wmic os get installdate /value'
-    output = subprocess.check_output(command, shell=True, universal_newlines=True)
-    install_date_str = output.strip().split('=')[1]
-    install_date = datetime.datetime.strptime(install_date_str, '%Y%m%d%H%M%S')
-    return install_date
+    # command = 'wmic os get installdate /value'
+    # output = subprocess.check_output(command, shell=True, universal_newlines=True)
+    # install_date_str = output.strip().split('=')[1]
+    # install_date = datetime.datetime.strptime(install_date_str, '%Y%m%d%H%M%S')
+    # return install_date
+    return "N/A"
 
 def get_windows_version():
     if platform.system() == 'Windows':
@@ -140,6 +140,8 @@ def get_linux_kernel_version():
     return platform.uname().release
 
 def get_system_uptime():
+    if psutil.WINDOWS:
+        return "N/A"
     uptime_output = subprocess.check_output(['uptime', '-p'], universal_newlines=True)
     return uptime_output.strip()
 
@@ -326,8 +328,11 @@ def printResults(min_temperature, max_temperature, avg_temperature, interval, id
 
 
     prInfo("[INFO] - Generating HTML report")
-    now = datetime.now()
+    # now = datetime.now()
+    now = datetime.datetime.now()
     time = now.strftime("%Y-%m-%d-%H:%M:%S")
+    if psutil.WINDOWS:
+        time = time.replace(':', '-')
     generate_line_graph(dropOff, time)
     
     template = f"""
@@ -471,20 +476,23 @@ def get_cpu_temperature():
         if psutil.WINDOWS:
             # Windows
             def avg(value_list):
-                num = 0
-                length = len(value_list)
-                for val in value_list:
-                    num += val
-                return num/length
+                if len(value_list) == 0:
+                    return 0
+                return sum(value_list) / len(value_list)
+                # num = 0
+                # length = len(value_list)
+                # for val in value_list:
+                #     num += val
+                # return num / length
                 
                 
             w = wmi.WMI(namespace="root\\OpenHardwareMonitor")
             sensors = w.Sensor()
             cpu_temps = []
             for sensor in sensors:
-                if sensor.SensorType==u'Temperature' and not 'GPU' in sensor.Name:
-                    cpu_temps += [float(sensor.Value)]
-            temperature = format(avg(cpu_temps))
+                if sensor.SensorType == u'Temperature' and 'GPU' not in sensor.Name:
+                    cpu_temps.append(float(sensor.Value))
+            temperature = avg(cpu_temps)
             prOk(f"[OK] - CPU temperature: {temperature}°C")
             return temperature
         else:
