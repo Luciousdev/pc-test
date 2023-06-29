@@ -472,13 +472,14 @@ def get_cpu_temperature():
             # Windows
             ohm_dll.HardwareMonitor_Init()
 
-            sensors = (OHMSensor * 64)()
+            temperature = (OHMSensor * 64)()
 
-            num_sensors = ohm_dll.HarwareMonitor_GetSensors(sensors, ctypes.c_int(len(sensors)))
+            num_sensors = ohm_dll.HarwareMonitor_GetSensors(temperature, ctypes.c_int(len(temperature)))
 
-            # for i in range(num_sensors):
-            #     if b"package" in sensors[i].Identifier.lower():
-            #         return sensors[i].Value
+            for i in range(num_sensors):
+                if b"package" in temperature[i].Identifier.lower():
+                    prOk(f"[OK] - CPU temperature: {temperature}°C")
+                    return temperature[i].Value
             
             return None
             # command = "wmic path Win32_PerfFormattedData_Counters_ThermalZoneInformation get Temperature /value"
