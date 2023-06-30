@@ -7,7 +7,10 @@
     - [Packages](#packages) 
     - [What it does](#what-it-does) 
 - [Guides](#guides)
-    - [Install guide](#install-guide)
+    - [Manual guide](#manual-install-guide)
+    - [Automatic install guide](#auto-install)
+        - [Windows install](#windows-install)
+        - [Linux install](#linux-install)
     - [How to use the program and default settings](#how-to-use-the-program&default-settings)
 - [Output](#output)
 - [Known-issues](#issues)
@@ -48,7 +51,7 @@ This script will gather basic data about the system and will run a small CPU ben
 
 ## Guides
 
-### Install-guide
+### Manual-Install-guide
 
 Install at least python 3.10 or above. Versions below that will most likely work but those haven't been tested and thus aren't fully supported.
 
@@ -61,6 +64,32 @@ Install at least python 3.10 or above. Versions below that will most likely work
    ```
    python get-data.py
    ```
+
+### Auto-install
+
+#### Windows-install
+
+For the windows install run the install-windows.bat file in the project repository.
+The script will install python version 3.10 and run the project. If you already have the correct python version and just want to run the script use this command:
+
+```
+python get-data.py
+```
+
+#### Linux-install
+
+To run the linux installer open a terminal and cd into the directory where you've downloaded the project.
+Use this command to then run the script:
+
+```
+sh install-linux.sh
+```
+
+The script will install python version 3.10 and run the project. If you already have the correct python version and just want to run the script use this command:
+
+```
+python get-data.py
+```
 
 ### How-to-use-the-program&default-settings
 
