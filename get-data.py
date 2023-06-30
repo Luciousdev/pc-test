@@ -15,10 +15,10 @@ import matplotlib.pyplot as plt
 # ------------------ CONSOLE OUTPUT COLORS ---------------#
 #                                                         #
 #---------------------------------------------------------#
-def prError(skk):print("\033[91m {}\033[00m" .format(skk))
-def prOk(skk):print("\033[92m {}\033[00m" .format(skk))
-def prWarning(skk):print("\033[93m {}\033[00m" .format(skk))
-def prInfo(skk):print("\033[94m {}\033[00m" .format(skk))
+def prError(skk):print("\033[91m{}\033[00m" .format(skk))
+def prOk(skk):print("\033[92m{}\033[00m" .format(skk))
+def prWarning(skk):print("\033[93m{}\033[00m" .format(skk))
+def prInfo(skk):print("\033[94m{}\033[00m" .format(skk))
 
 version = "1.0.0"
 

@@ -4,3 +4,4 @@ gpu-load.py
 *.html
 *.png
 TODO.txt
+*.log
