@@ -54,8 +54,25 @@ if [ -f /etc/os-release ]; then
         exit
 
     elif [[ "$ID" == "debian" || "$ID_LIKE" == *"debian"* ]]; then
-        echo "[OK] - Detected Debian-based Linux distribution"
+        echo -e "\033[1A\033[K$COK - Detected Debian-based Linux distribution"
         
+        if [ command -v python3 >/dev/null 2>&1 && echo Python 3 is installed ]; then
+            echo -e "\033[1A\033[K$COK - Python 3 is installed"
+        else
+            echo -e "\033[1A\033[K$CWR - Installing python version 3.10"
+            sudo apt-get update
+            sudo apt-get install -y python3.10
+            exit
+        fi
+
+        echo -en "$CNT - Installing packages."
+        pip install -r requirements.txt
+        echo -e "\033[1A\033[K$COK - Packages installed."
+
+        echo -en "$CNT - Running python script."
+        python get-data.py
+        exit
+
     else
         echo "Unknown distribution"
     fi
