@@ -122,12 +122,15 @@ def get_system_info():
 
 # Install date of OS (Windows)
 def get_windows_install_date():
-    # command = 'wmic os get installdate /value'
-    # output = subprocess.check_output(command, shell=True, universal_newlines=True)
-    # install_date_str = output.strip().split('=')[1]
-    # install_date = datetime.datetime.strptime(install_date_str, '%Y%m%d%H%M%S')
-    # return install_date
-    return "N/A"
+    try:
+        command = 'wmic os get installdate /value'
+        output = subprocess.check_output(command, shell=True, universal_newlines=True)
+        install_date_str = output.strip().split('=')[1]
+        install_date = datetime.datetime.strptime(install_date_str, '%Y%m%d%H%M%S')
+        return install_date
+    except Exception as e:
+        prError(f"[ERROR] - Getting windows install date: {e}") 
+        return "N/A"
 
 def get_windows_version():
     if platform.system() == 'Windows':
