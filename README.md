@@ -119,7 +119,7 @@ There are example reports for [WINDOWS](https://examples.luciousdev.nl/windows/)
 
 ## issues
 
-- Temperature readings on windows are currently not working. (currently working on support.)
+- Temperature readings on windows do work but on some devices it will report as 0. (currently working on a fix.)
 - Temperature readings on linux can be a bit buggy.
 - CPU Percent readings are still a hit or miss.
 
